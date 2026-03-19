@@ -1,4 +1,4 @@
-// Firebase initialization (client-side only)
+// Firebase initialization
 let firebaseApp: any = null
 
 export async function getFirebaseApp() {
@@ -21,9 +21,8 @@ export async function getFirebaseApp() {
     return null
   }
 
-  if (typeof window !== 'undefined') {
-    firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig)
-  }
+  // Initialize Firebase (works in both server and client)
+  firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig)
 
   return firebaseApp
 }

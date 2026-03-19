@@ -9,33 +9,36 @@ export function useAuth() {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
+    let isMounted = true
 
     const initAuth = async () => {
       try {
         const { getAuth, onAuthStateChanged } = await import('firebase/auth')
         const { getFirebaseApp } = await import('@/lib/firebase')
-        
+
         const app = await getFirebaseApp()
         if (!app) {
           console.warn('Firebase app not initialized')
-          setLoading(false)
+          if (isMounted) setLoading(false)
           return
         }
 
         const auth = getAuth(app)
-        unsubscribe = onAuthStateChanged(auth, (user) => {
-          setUser(user || null)
+        unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+          if (!isMounted) return
+          setUser(firebaseUser || null)
           setLoading(false)
         })
       } catch (error) {
         console.error('Auth initialization error:', error)
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
 
     initAuth()
 
     return () => {
+      isMounted = false
       unsubscribe?.()
     }
   }, [])
