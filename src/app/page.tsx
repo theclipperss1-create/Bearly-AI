@@ -535,7 +535,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {/* Usage Indicator */}
             {user && userUsage && (
-              <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-800/30 border border-gray-700/50">
+              <div data-testid="token-usage" className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-800/30 border border-gray-700/50">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                   <span className="text-xs text-gray-400">
@@ -674,6 +674,7 @@ export default function Home() {
             {/* Limit Exceeded Warning */}
             {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
               <motion.div
+                data-testid="limit-exceeded-banner"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30"
@@ -695,6 +696,7 @@ export default function Home() {
 
             <div className="relative flex items-center gap-3">
               <motion.input
+                data-testid="chat-input"
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}

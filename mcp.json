@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "testsprite": {
+      "command": "npx",
+      "args": ["-y", "@testsprite/mcp@latest"],
+      "env": {
+        "TESTSPRITE_API_KEY": "${TESTSPRITE_API_KEY}",
+        "TESTSPRITE_PROJECT_ID": "${TESTSPRITE_PROJECT_ID}",
+        "TESTSPRITE_BASE_URL": "https://ai-chatbot-rust-six-13.vercel.app"
+      }
+    }
+  }
+}

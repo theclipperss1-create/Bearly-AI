@@ -77,6 +77,7 @@ export default function Sidebar({
 
       {/* Sidebar */}
       <motion.aside
+        data-testid="sidebar"
         initial={{ x: -300 }}
         animate={{ x: isOpen ? 0 : -300 }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
@@ -154,6 +155,7 @@ export default function Sidebar({
                 chats.map(chat => (
                   <motion.div
                     key={chat.id}
+                    data-testid="chat-item"
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="group relative"
