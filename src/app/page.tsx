@@ -381,7 +381,7 @@ export default function Home() {
       // Refresh user usage even on error
       loadUserUsage()
     }
-  }, [input, isLoading, currentChatId, user, messages, selectedModel, loadChats, loadUserUsage, throttledScrollToBottom, scrollToBottom])
+  }, [input, isLoading, currentChatId, user, messages, selectedModel, loadChats, loadUserUsage, throttledScrollToBottom, scrollToBottom, userUsage])
 
   if (authLoading) {
     return (
@@ -685,7 +685,7 @@ export default function Home() {
                   <div className="flex-1">
                     <p className="text-red-400 font-medium text-sm">Daily Limit Exceeded</p>
                     <p className="text-red-400/70 text-xs mt-1">
-                      You've used <strong>{userUsage?.tokensUsedToday.toLocaleString()}</strong> of <strong>{userUsage?.dailyLimit.toLocaleString()}</strong> tokens today.
+                      You&apos;ve used <strong>{userUsage?.tokensUsedToday.toLocaleString()}</strong> of <strong>{userUsage?.dailyLimit.toLocaleString()}</strong> tokens today.
                       {userUsage?.tier === 'free' && ' Upgrade your tier or wait until tomorrow.'}
                     </p>
                   </div>
@@ -699,7 +699,7 @@ export default function Home() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 placeholder={hasExceededLimit || (userUsage && userUsage.tokensUsedToday >= userUsage.dailyLimit && userUsage.tier !== 'admin') ? "Daily limit exceeded - upgrade your tier" : "Message Bearly..."}
-                disabled={isLoading || hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit)}
+                disabled={isLoading || hasExceededLimit || !!(userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit)}
                 className="flex-1 px-5 py-4 rounded-2xl border border-gray-700/50 bg-gray-800/30 text-white placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 style={{
                   boxShadow: '0 0 0 0 rgba(59, 130, 246, 0)',
