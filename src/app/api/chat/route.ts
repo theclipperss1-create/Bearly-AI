@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       try {
         const { getFirestore } = await import('firebase/firestore')
         const { getFirebaseApp } = await import('@/lib/firebase')
-        const { doc, getDoc, updateDoc, increment, Timestamp } = await import('firebase/firestore')
+        const { doc, getDoc, updateDoc, increment, Timestamp, setDoc } = await import('firebase/firestore')
         const { DEFAULT_LIMITS } = await import('@/lib/types')
 
         const app = await getFirebaseApp()
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
           if (usageSnap.exists()) {
             userUsage = usageSnap.data()
-            
+
             // Reset daily usage if needed
             const today = new Date().toISOString().split('T')[0]
             if (userUsage.lastResetDate !== today) {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
               lastResetDate: new Date().toISOString().split('T')[0],
               totalTokensUsed: 0,
             }
-            await updateDoc(usageRef, {
+            await setDoc(usageRef, {
               ...userUsage,
               createdAt: Timestamp.now(),
               updatedAt: Timestamp.now(),
@@ -66,11 +66,11 @@ export async function POST(request: NextRequest) {
 
           // Check if user has enough tokens
           const estimatedTokens = messages.reduce((acc: number, m: any) => acc + estimateTokens(m.content), 0)
-          
+
           if (userUsage.tier !== 'admin' || userUsage.dailyLimit !== -1) {
             if (userUsage.tokensUsedToday + estimatedTokens > userUsage.dailyLimit) {
               return NextResponse.json(
-                { 
+                {
                   error: 'Daily limit exceeded',
                   remaining: userUsage.dailyLimit - userUsage.tokensUsedToday,
                   limit: userUsage.dailyLimit,
@@ -112,7 +112,9 @@ export async function POST(request: NextRequest) {
 
     // Create a streaming response with token tracking
     const encoder = new TextEncoder()
+    const decoder = new TextDecoder()
     let totalTokens = 0
+    let buffer = ''
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -125,25 +127,61 @@ export async function POST(request: NextRequest) {
         try {
           while (true) {
             const { done, value } = await reader.read()
-            if (done) break
-
-            const chunk = new TextDecoder().decode(value)
-            const lines = chunk.split('\n')
-
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6)
-                if (data === '[DONE]') continue
-
-                try {
-                  const parsed = JSON.parse(data)
-                  const content = parsed.choices?.[0]?.delta?.content || ''
-                  if (content) {
-                    controller.enqueue(encoder.encode(content))
-                    totalTokens += estimateTokens(content)
+            if (done) {
+              // Process any remaining data in buffer
+              if (buffer.trim()) {
+                const trimmedLine = buffer.trim()
+                if (trimmedLine.startsWith('data: ')) {
+                  const data = trimmedLine.slice(6).trim()
+                  if (data !== '[DONE]') {
+                    try {
+                      const parsed = JSON.parse(data)
+                      const content = parsed.choices?.[0]?.delta?.content || ''
+                      if (content) {
+                        controller.enqueue(encoder.encode(content))
+                        totalTokens += estimateTokens(content)
+                      }
+                    } catch (e) {
+                      // Ignore incomplete data
+                    }
                   }
-                } catch {
-                  // Skip invalid JSON
+                }
+              }
+              break
+            }
+
+            // Decode chunk and add to buffer
+            const chunk = decoder.decode(value, { stream: true })
+            buffer += chunk
+
+            // Process complete SSE messages (separated by double newline)
+            const parts = buffer.split('\n\n')
+            buffer = parts.pop() || ''
+
+            for (const part of parts) {
+              const lines = part.split('\n')
+              for (const line of lines) {
+                const trimmedLine = line.trim()
+                if (trimmedLine.startsWith('data: ')) {
+                  const data = trimmedLine.slice(6).trim()
+                  if (data === '[DONE]') continue
+
+                  try {
+                    const parsed = JSON.parse(data)
+                    
+                    // Check for finish reason
+                    const finishReason = parsed.choices?.[0]?.finish_reason
+                    if (finishReason === 'stop') continue
+                    
+                    const content = parsed.choices?.[0]?.delta?.content || ''
+                    if (content) {
+                      controller.enqueue(encoder.encode(content))
+                      totalTokens += estimateTokens(content)
+                    }
+                  } catch (e) {
+                    console.log('Parse error:', e, 'Data:', data)
+                    // Skip invalid JSON
+                  }
                 }
               }
             }
@@ -162,11 +200,18 @@ export async function POST(request: NextRequest) {
               if (app) {
                 const db = getFirestore(app)
                 const usageRef = doc(db, 'user_usage', userId)
+                
+                // Log for debugging
+                console.log(`Updating usage for user ${userId}: ${totalTokens} tokens`)
+                
                 await updateDoc(usageRef, {
+                  userId,
                   tokensUsedToday: increment(totalTokens),
                   totalTokensUsed: increment(totalTokens),
                   updatedAt: Timestamp.now(),
                 })
+                
+                console.log(`Usage updated successfully for user ${userId}`)
               }
             } catch (error) {
               console.error('Error updating usage:', error)

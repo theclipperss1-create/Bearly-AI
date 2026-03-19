@@ -54,7 +54,7 @@ export async function saveMessage(
 export async function getChatHistory(userId: string): Promise<any[]> {
   try {
     const { getFirestore } = await import('./firebase')
-    const { collection, query, where, orderBy, getDocs } = await import('firebase/firestore')
+    const { collection, query, where, orderBy, getDocs, Timestamp, deleteDoc, doc } = await import('firebase/firestore')
     const db = await getFirestore()
     if (!db) return []
 
@@ -65,12 +65,52 @@ export async function getChatHistory(userId: string): Promise<any[]> {
     )
 
     const snapshot = await getDocs(chatsQuery)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    const chats: any[] = []
+    const fiveDaysAgo = Date.now() - (5 * 24 * 60 * 60 * 1000) // 5 days in milliseconds
+
+    // Filter chats older than 5 days and delete them
+    for (const docSnap of snapshot.docs) {
+      const chatData = docSnap.data()
+      const chatTimestamp = chatData.updatedAt?.toMillis?.() || chatData.updatedAt?.seconds * 1000 || 0
+      
+      if (chatTimestamp < fiveDaysAgo) {
+        // Delete old chat and its messages
+        await deleteDoc(doc(db, 'chats', docSnap.id))
+        await deleteChatMessages(docSnap.id)
+        console.log(`Deleted old chat: ${docSnap.id} (older than 5 days)`)
+      } else {
+        chats.push({
+          id: docSnap.id,
+          ...chatData,
+        })
+      }
+    }
+
+    return chats
   } catch (error) {
+    console.error('Error loading chat history:', error)
     return []
+  }
+}
+
+// Helper function to delete all messages in a chat
+async function deleteChatMessages(chatId: string): Promise<void> {
+  try {
+    const { getFirestore } = await import('./firebase')
+    const { collection, query, where, getDocs, deleteDoc, doc } = await import('firebase/firestore')
+    const db = await getFirestore()
+    if (!db) return
+
+    const messagesQuery = query(
+      collection(db, 'messages'),
+      where('chatId', '==', chatId)
+    )
+
+    const snapshot = await getDocs(messagesQuery)
+    const deletePromises = snapshot.docs.map(msgDoc => deleteDoc(doc(db, 'messages', msgDoc.id)))
+    await Promise.all(deletePromises)
+  } catch (error) {
+    console.error('Error deleting chat messages:', error)
   }
 }
 
@@ -116,22 +156,15 @@ export async function updateChatTitle(chatId: string, title: string): Promise<vo
 
 export async function deleteChat(chatId: string): Promise<void> {
   try {
+    await deleteChatMessages(chatId)
+    
     const { getFirestore } = await import('./firebase')
-    const { collection, query, where, getDocs, deleteDoc, doc } = await import('firebase/firestore')
+    const { deleteDoc, doc } = await import('firebase/firestore')
     const db = await getFirestore()
     if (!db) return
 
-    const messagesQuery = query(
-      collection(db, 'messages'),
-      where('chatId', '==', chatId)
-    )
-
-    const snapshot = await getDocs(messagesQuery)
-    const deletePromises = snapshot.docs.map(docRef => deleteDoc(docRef.ref))
-    await Promise.all(deletePromises)
-
     await deleteDoc(doc(db, 'chats', chatId))
   } catch (error) {
-    // Silent fail
+    console.error('Error deleting chat:', error)
   }
 }

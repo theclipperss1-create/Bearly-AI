@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface Model {
   id: string
   name: string
+  description?: string
 }
 
 interface ModelSwitcherProps {
@@ -15,9 +16,10 @@ interface ModelSwitcherProps {
 }
 
 const AVAILABLE_MODELS: Model[] = [
-  { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-  { id: 'stepfun/step-3.5-flash', name: 'Step 3.5 Flash (free)' },
-  { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B' },
+  { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast & efficient' },
+  { id: 'stepfun/step-3.5-flash', name: 'Step 3.5 Flash (free)', description: 'Completely free' },
+  { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', description: 'Best value - recommended' },
+  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B', description: 'Lightweight & fast' },
 ]
 
 export default function ModelSwitcher({
@@ -100,25 +102,32 @@ export default function ModelSwitcher({
                     onModelChange(model.id)
                     onToggle()
                   }}
-                  className={`w-full px-4 py-3.5 text-left text-sm hover:bg-gray-800/50 transition-colors flex items-center justify-between group/item ${
-                    selectedModel === model.id 
-                      ? 'text-blue-400 font-semibold' 
+                  className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-800/50 transition-colors flex items-center justify-between group/item ${
+                    selectedModel === model.id
+                      ? 'text-blue-400 font-semibold'
                       : 'text-gray-300'
                   }`}
                 >
-                  <span>{model.name}</span>
-                  {selectedModel === model.id && (
-                    <motion.svg 
-                      className="w-5 h-5" 
-                      fill="currentColor" 
-                      viewBox="0 0 20 20"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 300 }}
-                    >
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </motion.svg>
-                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{model.name}</span>
+                      {selectedModel === model.id && (
+                        <motion.svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: 'spring', stiffness: 300 }}
+                        >
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </motion.svg>
+                      )}
+                    </div>
+                    {model.description && (
+                      <p className="text-xs text-gray-500 mt-0.5">{model.description}</p>
+                    )}
+                  </div>
                 </motion.button>
               ))}
             </motion.div>

@@ -36,19 +36,26 @@ service cloud.firestore {
       allow create: if isAuthenticated()
                     && request.resource.data.keys().hasAll(['chatId', 'role', 'content']);
 
-      allow read: if isAuthenticated();
+      // Allow read if user owns the chat that this message belongs to
+      allow read: if isAuthenticated() && exists(/databases/$(database)/documents/chats/$(resource.data.chatId))
+                  && get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid;
 
-      allow update, delete: if false; // Messages are immutable
+      // Allow delete if user owns the chat
+      allow delete: if isAuthenticated() && exists(/databases/$(database)/documents/chats/$(resource.data.chatId))
+                    && get(/databases/$(database)/documents/chats/$(resource.data.chatId)).data.userId == request.auth.uid;
     }
 
     // ==================================
     // USER_USAGE COLLECTION
     // ==================================
     // Users can read their own usage, admins can update all
+    // Also allow server-side updates via API routes (when request.auth is null but userId matches)
     match /user_usage/{userId} {
       allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // Allow update if: (1) user owns it, (2) is admin, or (3) server-side API call with matching userId
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin())
+                    || (request.auth == null && request.resource.data.keys().hasAll(['userId', 'tokensUsedToday', 'totalTokensUsed']));
       allow delete: if isAdmin();
     }
 

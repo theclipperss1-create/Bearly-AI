@@ -16,9 +16,10 @@ export interface Message {
 }
 
 const AVAILABLE_MODELS = [
-  { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-  { id: 'stepfun/step-3.5-flash', name: 'Step 3.5 Flash (free)' },
-  { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B' },
+  { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast & efficient' },
+  { id: 'stepfun/step-3.5-flash', name: 'Step 3.5 Flash (free)', description: 'Completely free' },
+  { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', description: 'Best value - recommended' },
+  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B', description: 'Lightweight & fast' },
 ]
 
 // Throttle function untuk limit re-renders
@@ -49,6 +50,7 @@ export default function Home() {
   const { user, loading: authLoading, signIn, logOut } = useAuth()
   const saveMessageRef = useRef<NodeJS.Timeout | null>(null)
   const [userUsage, setUserUsage] = useState<{ tokensUsedToday: number; dailyLimit: number; tier: string } | null>(null)
+  const [hasExceededLimit, setHasExceededLimit] = useState(false)
 
   // Optimized scroll with throttle
   const scrollToBottom = useCallback(() => {
@@ -103,6 +105,10 @@ export default function Home() {
         dailyLimit: usage.dailyLimit,
         tier: usage.tier,
       })
+      // Reset exceeded flag if usage has been reset
+      if (usage.tokensUsedToday < usage.dailyLimit || usage.dailyLimit === -1) {
+        setHasExceededLimit(false)
+      }
     } catch (error) {
       console.error('Error loading user usage:', error)
     }
@@ -224,13 +230,28 @@ export default function Home() {
     e.preventDefault()
     if (!input.trim() || isLoading) return
 
+    // Check if user has exceeded limit
+    if (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1) {
+      const remaining = userUsage.dailyLimit - userUsage.tokensUsedToday
+      if (remaining <= 0) {
+        setHasExceededLimit(true)
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: `⚠️ **Daily Limit Exceeded**\n\nYou've used **${userUsage.tokensUsedToday.toLocaleString()}** of **${userUsage.dailyLimit.toLocaleString()}** tokens today.\n\nPlease contact admin to upgrade your tier or try again tomorrow when your limit resets.`,
+          timestamp: Date.now(),
+        }])
+        return
+      }
+    }
+
     let chatId = currentChatId
 
     // Create new chat if doesn't exist
     if (!chatId && user) {
       chatId = await createChat(user.uid, input.trim().slice(0, 50))
       setCurrentChatId(chatId)
-      loadChats()
+      await loadChats()
     }
 
     const userMessage: Message = {
@@ -242,17 +263,18 @@ export default function Home() {
 
     setMessages(prev => [...prev, userMessage])
 
-    // Save to Firestore (debounced)
+    // Save to Firestore
     if (chatId && user) {
-      saveMessage(chatId, 'user', input.trim())
+      await saveMessage(chatId, 'user', input.trim())
       if (messages.length === 0) {
-        updateChatTitle(chatId, input.trim().slice(0, 50))
-        loadChats()
+        await updateChatTitle(chatId, input.trim().slice(0, 50))
+        await loadChats()
       }
     }
 
     setInput('')
     setIsLoading(true)
+    setHasExceededLimit(false)
 
     try {
       const response = await fetch('/api/chat', {
@@ -331,12 +353,19 @@ export default function Home() {
         )
         scrollToBottom()
 
-        // Save assistant message to Firestore (debounced)
+        // Save assistant message to Firestore
         if (chatId && user) {
-          saveMessage(chatId, 'assistant', fullContent)
-          updateChatTitle(chatId, input.trim().slice(0, 50))
-          loadChats()
+          try {
+            await saveMessage(chatId, 'assistant', fullContent)
+            await updateChatTitle(chatId, input.trim().slice(0, 50))
+            await loadChats()
+          } catch (error) {
+            console.error('Error saving chat:', error)
+          }
         }
+
+        // Refresh user usage after chat completes
+        loadUserUsage()
       }
     } catch (error) {
       console.error('Error:', error)
@@ -349,8 +378,10 @@ export default function Home() {
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
+      // Refresh user usage even on error
+      loadUserUsage()
     }
-  }, [input, isLoading, currentChatId, user, messages, selectedModel, loadChats, throttledScrollToBottom, scrollToBottom])
+  }, [input, isLoading, currentChatId, user, messages, selectedModel, loadChats, loadUserUsage, throttledScrollToBottom, scrollToBottom])
 
   if (authLoading) {
     return (
@@ -640,13 +671,35 @@ export default function Home() {
         {/* Input Form */}
         <div className="px-6 py-5 border-t border-gray-700/50 bg-[#0d1117]/80">
           <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+            {/* Limit Exceeded Warning */}
+            {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30"
+              >
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-red-400 font-medium text-sm">Daily Limit Exceeded</p>
+                    <p className="text-red-400/70 text-xs mt-1">
+                      You've used <strong>{userUsage?.tokensUsedToday.toLocaleString()}</strong> of <strong>{userUsage?.dailyLimit.toLocaleString()}</strong> tokens today.
+                      {userUsage?.tier === 'free' && ' Upgrade your tier or wait until tomorrow.'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+
             <div className="relative flex items-center gap-3">
               <motion.input
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="Message Bearly..."
-                disabled={isLoading}
+                placeholder={hasExceededLimit || (userUsage && userUsage.tokensUsedToday >= userUsage.dailyLimit && userUsage.tier !== 'admin') ? "Daily limit exceeded - upgrade your tier" : "Message Bearly..."}
+                disabled={isLoading || hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit)}
                 className="flex-1 px-5 py-4 rounded-2xl border border-gray-700/50 bg-gray-800/30 text-white placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 style={{
                   boxShadow: '0 0 0 0 rgba(59, 130, 246, 0)',
