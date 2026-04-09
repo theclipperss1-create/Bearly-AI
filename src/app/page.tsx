@@ -635,42 +635,38 @@ export default function Home() {
                   />
                 ))}
               </AnimatePresence>
-              <AnimatePresence>
-                {messages.map((message, index) => (
-                  <ChatMessage 
-                    key={message.id} 
-                    message={message} 
-                    onCopy={handleCopy}
-                    copiedId={copiedId}
-                    onRegenerate={handleRegenerate}
-                    isLastMessage={index === messages.length - 1}
-                  />
-                ))}
-              </AnimatePresence>
-            )}
-            {isLoading && messages[messages.length - 1]?.role === 'user' && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-start"
-              >
-                <div className="px-5 py-4 rounded-2xl border border-[#1A1A1A]"
-                     style={{
-                       background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                       backdropFilter: 'blur(10px)',
-                       boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-                     }}>
-                  <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-white/40 typing-dot" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-white/30 typing-dot" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-white/20 typing-dot" />
+              {isLoading && messages[messages.length - 1]?.role === 'user' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="border-b border-white/5 bg-white/[0.02]"
+                >
+                  <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+                    <div className="flex gap-4 sm:gap-6">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/10">
+                          <svg className="w-4 h-4 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">
+                          NOIR
+                        </div>
+                        <div className="flex gap-1.5">
+                          <div className="w-2 h-2 rounded-full bg-white/40 typing-dot" />
+                          <div className="w-2 h-2 rounded-full bg-white/30 typing-dot" />
+                          <div className="w-2 h-2 rounded-full bg-white/20 typing-dot" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-        </div>
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
 
         {/* Input Area - ChatGPT Style */}
         <div className="border-t border-white/5 bg-gradient-to-t from-[#0A0A0A] to-transparent">
