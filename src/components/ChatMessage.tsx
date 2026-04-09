@@ -23,7 +23,7 @@ export default function ChatMessage({ message, onCopy, copiedId, onRegenerate, i
       className={`group flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div
-        className="max-w-[85%] lg:max-w-[75%] rounded-2xl overflow-hidden"
+        className="max-w-[90%] sm:max-w-[85%] lg:max-w-[75%] rounded-xl sm:rounded-2xl overflow-hidden"
         style={{
           background: isUser
             ? 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)'
@@ -35,20 +35,20 @@ export default function ChatMessage({ message, onCopy, copiedId, onRegenerate, i
             : '0 4px 20px rgba(0, 0, 0, 0.2)',
         }}
       >
-        <div className="px-5 py-3.5">
-          <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-white">{message.content}</p>
+        <div className="px-4 sm:px-5 py-3 sm:py-3.5">
+          <p className="text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap text-white">{message.content}</p>
         </div>
-        <div className="flex items-center justify-between px-5 py-2 border-t border-white/5">
+        <div className="flex items-center justify-between px-3 sm:px-5 py-2 border-t border-white/5">
           <span className={`text-xs ${isUser ? 'text-white/50' : 'text-gray-600'}`}>
             {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity sm:opacity-100">
             <TooltipWrapper tooltip={copiedId === message.id ? 'Copied!' : 'Copy'}>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onCopy(message.content, message.id)}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors relative"
+                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors relative touch-target-lg"
               >
                 {copiedId === message.id ? (
                   <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@ export default function ChatMessage({ message, onCopy, copiedId, onRegenerate, i
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={onRegenerate}
-                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors relative"
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors relative touch-target-lg"
                 >
                   <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.058M20.97 12a9 9 0 11-1.97-5.644M15 11l3-3m0 0l-3-3m3 3H9" />

@@ -450,13 +450,13 @@ export default function Home() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full min-w-0">
         {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-xl">
-          <div className="flex items-center gap-4">
+        <header className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-xl mobile-safe-top">
+          <div className="flex items-center gap-2 sm:gap-4">
             <motion.button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="lg:hidden p-2 rounded-xl hover:bg-white/5 transition-colors"
+              className="lg:hidden p-2 rounded-xl hover:bg-white/5 transition-colors touch-target-lg"
             >
               <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -467,19 +467,19 @@ export default function Home() {
                 onClick={handleNewChat}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors"
+                className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-xl hover:bg-white/5 transition-colors touch-target-lg"
               >
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </motion.button>
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 hidden sm:block">
                 New chat (Ctrl+K)
               </span>
             </div>
             <div className="relative group">
               <motion.h2
-                className="text-lg font-medium text-white cursor-pointer"
+                className="text-base sm:text-lg font-medium text-white cursor-pointer"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4 }}
@@ -487,7 +487,7 @@ export default function Home() {
               >
                 Chat
               </motion.h2>
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 hidden sm:block">
                 Click to start new chat
               </span>
             </div>
@@ -496,9 +496,10 @@ export default function Home() {
                 <motion.span
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 text-xs text-gray-500"
+                  className="px-2 sm:px-2.5 py-1 rounded-lg bg-white/5 text-xs text-gray-500"
                 >
-                  {messages.length} messages
+                  <span className="hidden sm:inline">{messages.length} messages</span>
+                  <span className="sm:hidden">{messages.length}</span>
                 </motion.span>
                 <div className="relative group">
                   <motion.button
@@ -507,20 +508,20 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleRegenerate}
-                    className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/5 transition-colors touch-target-lg"
                   >
                     <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.058M20.97 12a9 9 0 11-1.97-5.644M15 11l3-3m0 0l-3-3m3 3H9" />
                     </svg>
                   </motion.button>
-                  <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                  <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 hidden sm:block">
                     Regenerate response
                   </span>
                 </div>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Context Panel Toggle */}
             <motion.button
               onClick={() => setIsContextPanelOpen(!isContextPanelOpen)}
@@ -564,8 +565,8 @@ export default function Home() {
         </header>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-8">
-          <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-8">
+          <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
             {messages.length === 0 ? (
               <motion.div
                 className="flex items-center justify-center min-h-[500px]"
@@ -573,10 +574,10 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="text-center">
+                <div className="text-center px-4">
                   {/* Animated Logo - NOIR Style */}
                   <motion.div
-                    className="w-24 h-24 mx-auto mb-8 rounded-3xl bg-[#161616] border border-[#1A1A1A] flex items-center justify-center"
+                    className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 sm:mb-8 rounded-2xl sm:rounded-3xl bg-[#161616] border border-[#1A1A1A] flex items-center justify-center"
                     style={{
                       boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
                     }}
@@ -589,20 +590,20 @@ export default function Home() {
                       rotate: { duration: 6, repeat: Infinity, ease: 'easeInOut' }
                     }}
                   >
-                    <svg className="w-14 h-14 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-10 h-10 sm:w-14 sm:h-14 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm3.5 3c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm3.5 3c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm3.5-3c.83 0 1.5-.67 1.5-1.5S14.83 8 14 8s-1.5.67-1.5 1.5.67 1.5 1.5 1.5zm3.5 3c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"/>
                     </svg>
                   </motion.div>
 
-                  <h2 className="text-3xl font-medium text-white tracking-wide mb-3">
+                  <h2 className="text-2xl sm:text-3xl font-medium text-white tracking-wide mb-2 sm:mb-3">
                     NOIR
                   </h2>
-                  <p className="text-gray-500 text-lg max-w-md mb-10">
+                  <p className="text-gray-500 text-base sm:text-lg max-w-md mb-8 sm:mb-10">
                     Premium AI chatbot with monochrome elegance
                   </p>
 
-                  {/* Suggestion Chips */}
-                  <div className="flex gap-3 justify-center flex-wrap">
+                  {/* Suggestion Chips - Mobile Optimized */}
+                  <div className="flex gap-2 sm:gap-3 justify-center flex-wrap px-2">
                     {[
                       { icon: '💻', text: 'Help me code' },
                       { icon: '🔬', text: 'Explain quantum physics' },
@@ -624,9 +625,9 @@ export default function Home() {
                             }
                           }, 100)
                         }}
-                        className="px-5 py-3.5 rounded-2xl border border-[#1A1A1A] bg-[#161616] text-gray-400 text-sm hover:bg-[#1C1C1C] hover:text-white transition-all flex items-center gap-2 cursor-pointer card-hover"
+                        className="suggestion-chip px-4 sm:px-5 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl border border-[#1A1A1A] bg-[#161616] text-gray-400 text-xs sm:text-sm hover:bg-[#1C1C1C] hover:text-white transition-all flex items-center gap-2 cursor-pointer card-hover touch-target-lg"
                       >
-                        <span className="text-lg">{suggestion.icon}</span>
+                        <span className="text-base sm:text-lg">{suggestion.icon}</span>
                         {suggestion.text}
                       </motion.button>
                     ))}
@@ -671,8 +672,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Input Form - NOIR Style */}
-        <div className="px-6 py-5 border-t border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-xl">
+        {/* Input Form - NOIR Style - Mobile Optimized */}
+        <div className="px-3 sm:px-6 py-3 sm:py-5 border-t border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-xl mobile-safe-bottom">
           <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
             {/* Limit Exceeded Warning */}
             {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
@@ -680,14 +681,14 @@ export default function Home() {
                 data-testid="limit-exceeded-banner"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/20"
+                className="mb-3 sm:mb-4 p-3 sm:p-4 rounded-xl bg-red-500/10 border border-red-500/20"
               >
                 <div className="flex items-start gap-3">
                   <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-red-400 font-medium text-sm">Daily Limit Exceeded</p>
+                    <p className="text-red-400 font-medium text-xs sm:text-sm">Daily Limit Exceeded</p>
                     <p className="text-red-400/70 text-xs mt-1">
                       You&apos;ve used <strong>{userUsage?.tokensUsedToday.toLocaleString()}</strong> of <strong>{userUsage?.dailyLimit.toLocaleString()}</strong> tokens today.
                       {userUsage?.tier === 'free' && ' Upgrade your tier or wait until tomorrow.'}
@@ -705,11 +706,12 @@ export default function Home() {
                 placeholder={hasExceededLimit || (userUsage && userUsage.tokensUsedToday >= userUsage.dailyLimit && userUsage.tier !== 'admin') ? "Daily limit exceeded - upgrade your tier" : "Message NOIR..."}
                 disabled={isLoading || hasExceededLimit || !!(userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit)}
                 rows={1}
-                className="w-full px-5 py-4 rounded-2xl border border-[#1A1A1A] bg-[#161616] text-white placeholder-gray-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all resize-none"
+                className="w-full px-4 sm:px-5 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-[#1A1A1A] bg-[#161616] text-white placeholder-gray-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all resize-none touch-target-lg"
                 style={{
                   minHeight: '56px',
                   maxHeight: '200px',
                   boxShadow: '0 0 0 0 rgba(255, 255, 255, 0)',
+                  fontSize: '16px', // Prevents iOS zoom on focus
                 }}
                 onFocus={e => {
                   e.target.style.boxShadow = '0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.03)';
@@ -726,18 +728,18 @@ export default function Home() {
                   }
                 }}
               />
-              <div className="absolute right-3 bottom-3">
+              <div className="absolute right-2 sm:right-3 bottom-2 sm:bottom-3">
                 {isLoading ? (
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="p-2.5 rounded-xl bg-[#1C1C1C] border border-[#1A1A1A]"
+                    className="p-2 sm:p-2.5 rounded-xl bg-[#1C1C1C] border border-[#1A1A1A]"
                   >
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1 sm:gap-1.5">
                       {[0, 1, 2].map((i) => (
                         <motion.div
                           key={i}
-                          className="w-2 h-2 rounded-full bg-white/30"
+                          className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white/30"
                           animate={{
                             y: [0, -6, 0],
                             scale: [1, 1.2, 1],
@@ -759,13 +761,13 @@ export default function Home() {
                       disabled={!input.trim() || isLoading}
                       whileHover={{ scale: input.trim() && !isLoading ? 1.05 : 1 }}
                       whileTap={{ scale: input.trim() && !isLoading ? 0.95 : 1 }}
-                      className="p-2.5 rounded-xl bg-white text-black disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      className="p-2 sm:p-2.5 rounded-xl bg-white text-black disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-target-lg"
                       style={{
                         boxShadow: input.trim() && !isLoading ? '0 8px 25px rgba(255, 255, 255, 0.15)' : 'none',
                       }}
                     >
                       <motion.svg
-                        className="w-5 h-5"
+                        className="w-4 h-4 sm:w-5 sm:h-5"
                         fill="currentColor"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -775,14 +777,14 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h14M12 5l7 7-7 7" />
                       </motion.svg>
                     </motion.button>
-                    <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                    <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 hidden sm:block">
                       Send message
                     </span>
                   </div>
                 )}
               </div>
             </div>
-            <p className="text-xs text-gray-600 text-center mt-3">
+            <p className="text-xs text-gray-600 text-center mt-2 sm:mt-3 hidden sm:block">
               NOIR can make mistakes. Consider checking important information.
             </p>
           </form>

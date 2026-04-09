@@ -302,3 +302,95 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.04);
 }
+
+/* ========================================
+   MOBILE OPTIMIZATIONS
+   ======================================== */
+
+/* Mobile viewport fixes */
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Better touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Optimize text sizes for mobile */
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+
+  p, span {
+    font-size: 0.9375rem !important;
+  }
+
+  /* Improve input visibility on mobile */
+  input, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Small phones (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  .suggestion-chip {
+    padding: 0.625rem 1rem !important;
+    font-size: 0.8125rem !important;
+  }
+}
+
+/* Safe area insets for notched devices (iPhone X+) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .mobile-safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .mobile-safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .touch-target-lg {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Remove hover effects on touch devices */
+  .card-hover:hover {
+    transform: none;
+  }
+
+  /* Better button feedback */
+  button:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-landscape-hide {
+    display: none;
+  }
+}
