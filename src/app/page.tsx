@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import ChatMessage from '@/components/ChatMessage'
-import ModelChips from '@/components/ModelChips'
+import ModelSwitcher from '@/components/ModelSwitcher'
 import Sidebar from '@/components/Sidebar'
 import ContextPanel from '@/components/ContextPanel'
 import { useAuth } from '@/hooks/useAuth'
@@ -42,6 +42,7 @@ export default function Home() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id)
+  const [isModelSwitcherOpen, setIsModelSwitcherOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isContextPanelOpen, setIsContextPanelOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(280)
@@ -521,6 +522,31 @@ export default function Home() {
             )}
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Usage Indicator */}
+            {user && userUsage && (
+              <div data-testid="token-usage" className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-[#1A1A1A]">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse" />
+                  <span className="text-xs text-gray-400">
+                    {userUsage.tier === 'admin' ? '∞' : userUsage.tokensUsedToday.toLocaleString()} / {userUsage.dailyLimit === -1 ? '∞' : userUsage.dailyLimit.toLocaleString()}
+                  </span>
+                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
+                    userUsage.tier === 'admin' ? 'bg-white/10 text-white' :
+                    userUsage.tier === 'premium' ? 'bg-white/10 text-white' :
+                    'bg-gray-500/10 text-gray-400'
+                  }`}>
+                    {userUsage.tier.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            )}
+            {/* Model Switcher */}
+            <ModelSwitcher
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+              isOpen={isModelSwitcherOpen}
+              onToggle={() => setIsModelSwitcherOpen(!isModelSwitcherOpen)}
+            />
             {/* Context Panel Toggle */}
             <motion.button
               onClick={() => setIsContextPanelOpen(!isContextPanelOpen)}
@@ -650,14 +676,6 @@ export default function Home() {
         {/* Input Form - NOIR Style - Mobile Optimized */}
         <div className="px-3 sm:px-6 py-3 sm:py-5 border-t border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-xl mobile-safe-bottom">
           <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-            {/* Model Chips - Floating Above Input */}
-            <div className="mb-3 sm:mb-4">
-              <ModelChips
-                selectedModel={selectedModel}
-                onModelChange={setSelectedModel}
-              />
-            </div>
-
             {/* Limit Exceeded Warning */}
             {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
               <motion.div
