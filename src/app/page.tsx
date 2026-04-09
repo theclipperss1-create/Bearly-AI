@@ -667,6 +667,7 @@ export default function Home() {
               <div ref={messagesEndRef} />
             </div>
           )}
+        </div>
 
         {/* Input Area - ChatGPT Style */}
         <div className="border-t border-white/5 bg-gradient-to-t from-[#0A0A0A] to-transparent">
