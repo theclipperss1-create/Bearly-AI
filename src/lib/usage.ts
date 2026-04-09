@@ -1,34 +1,40 @@
 // Usage tracking and limits management
-
-import { getFirestore } from './firebase'
+import { db } from './firebase'
 import {
   collection,
   doc,
   getDoc,
+  getDocs,
   setDoc,
   updateDoc,
   increment,
   Timestamp,
-  query,
-  where,
-  getDocs,
 } from 'firebase/firestore'
 import type { UserUsage, UserTier, AdminConfig } from './types'
 import { DEFAULT_LIMITS, estimateTokens, shouldResetUsage } from './types'
 
 // Get or create user usage document
 export async function getOrCreateUserUsage(userId: string, userEmail: string): Promise<UserUsage> {
-  try {
-    const db = await getFirestore()
-    if (!db) throw new Error('Firestore not initialized')
+  if (!db) {
+    return {
+      userId,
+      tier: 'free',
+      tokensUsedToday: 0,
+      dailyLimit: DEFAULT_LIMITS.defaultDailyLimit,
+      lastResetDate: new Date().toISOString().split('T')[0],
+      totalTokensUsed: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+  }
 
+  try {
     const usageRef = doc(db, 'user_usage', userId)
     const usageSnap = await getDoc(usageRef)
 
     if (usageSnap.exists()) {
       const data = usageSnap.data()
-      
-      // Check if we need to reset daily usage
+
       if (shouldResetUsage(data.lastResetDate)) {
         const newUsage = {
           tokensUsedToday: 0,
@@ -60,7 +66,7 @@ export async function getOrCreateUserUsage(userId: string, userEmail: string): P
     const today = new Date().toISOString().split('T')[0]
     const newUsage: UserUsage = {
       userId,
-      tier: 'free', // Default tier
+      tier: 'free',
       tokensUsedToday: 0,
       dailyLimit: DEFAULT_LIMITS.defaultDailyLimit,
       lastResetDate: today,
@@ -78,7 +84,6 @@ export async function getOrCreateUserUsage(userId: string, userEmail: string): P
     return newUsage
   } catch (error) {
     console.error('Error getting user usage:', error)
-    // Return default free usage on error
     return {
       userId,
       tier: 'free',
@@ -93,14 +98,9 @@ export async function getOrCreateUserUsage(userId: string, userEmail: string): P
 }
 
 // Update user token usage
-export async function updateUserUsage(
-  userId: string,
-  tokensUsed: number
-): Promise<void> {
+export async function updateUserUsage(userId: string, tokensUsed: number): Promise<void> {
+  if (!db) return
   try {
-    const db = await getFirestore()
-    if (!db) return
-
     const usageRef = doc(db, 'user_usage', userId)
     await updateDoc(usageRef, {
       tokensUsedToday: increment(tokensUsed),
@@ -120,14 +120,13 @@ export async function checkUserLimit(
 ): Promise<{ allowed: boolean; remaining: number; limit: number }> {
   try {
     const usage = await getOrCreateUserUsage(userId, userEmail)
-    
-    // Admin with unlimited
+
     if (usage.tier === 'admin' && usage.dailyLimit === -1) {
       return { allowed: true, remaining: Infinity, limit: Infinity }
     }
 
     const remaining = usage.dailyLimit - usage.tokensUsedToday
-    
+
     if (remaining >= estimatedTokens) {
       return { allowed: true, remaining, limit: usage.dailyLimit }
     }
@@ -140,16 +139,11 @@ export async function checkUserLimit(
 }
 
 // Update user tier (admin only)
-export async function updateUserTier(
-  userId: string,
-  newTier: UserTier
-): Promise<void> {
+export async function updateUserTier(userId: string, newTier: UserTier): Promise<void> {
+  if (!db) return
   try {
-    const db = await getFirestore()
-    if (!db) return
-
     const usageRef = doc(db, 'user_usage', userId)
-    
+
     let dailyLimit = DEFAULT_LIMITS.defaultDailyLimit
     if (newTier === 'premium') dailyLimit = DEFAULT_LIMITS.premiumDailyLimit
     if (newTier === 'admin') dailyLimit = DEFAULT_LIMITS.adminDailyLimit
@@ -166,19 +160,16 @@ export async function updateUserTier(
 
 // Get all users usage (admin only)
 export async function getAllUsersUsage(): Promise<UserUsage[]> {
+  if (!db) return []
   try {
-    const db = await getFirestore()
-    if (!db) return []
-
     const usageRef = collection(db, 'user_usage')
     const snapshot = await getDocs(usageRef)
-    
     return snapshot.docs.map(doc => ({
       userId: doc.id,
       ...doc.data(),
       createdAt: doc.data().createdAt.toDate(),
       updatedAt: doc.data().updatedAt.toDate(),
-    })) as unknown as UserUsage[]
+    })) as UserUsage[]
   } catch (error) {
     console.error('Error getting all users usage:', error)
     return []
@@ -187,10 +178,9 @@ export async function getAllUsersUsage(): Promise<UserUsage[]> {
 
 // Get admin config
 export async function getAdminConfig(): Promise<AdminConfig> {
-  try {
-    const db = await getFirestore()
-    if (!db) return DEFAULT_LIMITS
+  if (!db) return DEFAULT_LIMITS
 
+  try {
     const configRef = doc(db, 'config', 'admin')
     const configSnap = await getDoc(configRef)
 
@@ -205,12 +195,10 @@ export async function getAdminConfig(): Promise<AdminConfig> {
   }
 }
 
-// Update admin config (add admin email)
+// Update admin config
 export async function updateAdminConfig(config: Partial<AdminConfig>): Promise<void> {
+  if (!db) return
   try {
-    const db = await getFirestore()
-    if (!db) return
-
     const configRef = doc(db, 'config', 'admin')
     await updateDoc(configRef, config)
   } catch (error) {

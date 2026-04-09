@@ -31,7 +31,9 @@ export function rateLimit(identifier: string): boolean {
 export async function middleware(request: NextRequest) {
   // Apply rate limiting to chat API
   if (request.nextUrl.pathname.startsWith('/api/chat')) {
-    const ip = request.ip ?? '127.0.0.1'
+    // Use forwarded header or fallback to anonymous
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    const ip = forwardedFor?.split(',')[0] ?? 'anonymous'
     const allowed = rateLimit(ip)
 
     if (!allowed) {

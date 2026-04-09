@@ -37,16 +37,16 @@ export default function ModelSwitcher({
         onClick={onToggle}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-gray-700/50 bg-gray-800/30 text-gray-300 hover:bg-gray-800/50 transition-all relative group"
+        className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[#1A1A1A] bg-[#161616] text-gray-300 hover:bg-[#1C1C1C] hover:text-white transition-all relative group card-hover"
         style={{
           backdropFilter: 'blur(10px)',
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
         }}
       >
-        <motion.svg 
-          className="w-4 h-4 text-blue-400" 
-          fill="none" 
-          stroke="currentColor" 
+        <motion.svg
+          className="w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2 }}
@@ -54,17 +54,17 @@ export default function ModelSwitcher({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </motion.svg>
         <span className="text-sm font-medium">{selectedModelName}</span>
-        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
-        
+
         {/* Tooltip */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-gray-900 border border-gray-700 text-xs text-gray-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-[#161616] border border-[#1A1A1A] text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50"
              style={{
                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
              }}>
           Switch model
-          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900" />
+          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-[#161616]" />
         </div>
       </motion.button>
 
@@ -83,15 +83,15 @@ export default function ModelSwitcher({
               animate={{ opacity: 1, y: 12, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.96 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute right-0 mt-2 w-64 rounded-2xl border border-gray-700/50 bg-gray-900 shadow-2xl overflow-hidden z-50"
+              className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#1A1A1A] bg-[#161616] shadow-2xl overflow-hidden z-50"
               style={{
                 backdropFilter: 'blur(40px)',
                 boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
               }}
             >
-              <div className="px-4 py-3 border-b border-gray-700/50"
+              <div className="px-4 py-3 border-b border-[#1A1A1A]"
                    style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Select Model</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Select Model</p>
               </div>
               {AVAILABLE_MODELS.map((model, index) => (
                 <motion.button
@@ -103,10 +103,10 @@ export default function ModelSwitcher({
                     onModelChange(model.id)
                     onToggle()
                   }}
-                  className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-800/50 transition-colors flex items-center justify-between group/item ${
+                  className={`w-full px-4 py-3 text-left text-sm hover:bg-white/5 transition-colors flex items-center justify-between group/item ${
                     selectedModel === model.id
-                      ? 'text-blue-400 font-semibold'
-                      : 'text-gray-300'
+                      ? 'text-white font-medium'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <div className="flex-1">
@@ -114,7 +114,7 @@ export default function ModelSwitcher({
                       <span className="font-medium">{model.name}</span>
                       {selectedModel === model.id && (
                         <motion.svg
-                          className="w-4 h-4"
+                          className="w-4 h-4 text-white"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                           initial={{ scale: 0 }}
@@ -126,7 +126,7 @@ export default function ModelSwitcher({
                       )}
                     </div>
                     {model.description && (
-                      <p className="text-xs text-gray-500 mt-0.5">{model.description}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">{model.description}</p>
                     )}
                   </div>
                 </motion.button>

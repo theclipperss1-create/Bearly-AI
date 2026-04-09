@@ -1,80 +1,64 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { User } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
+import { onAuthStateChanged, type User } from 'firebase/auth'
 
-export function useAuth() {
+interface UseAuthReturn {
+  user: User | null
+  loading: boolean
+  signIn: () => Promise<void>
+  logOut: () => Promise<void>
+  error: string | null
+}
+
+export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined
-    let isMounted = true
-
-    const initAuth = async () => {
-      try {
-        const { getAuth, onAuthStateChanged } = await import('firebase/auth')
-        const { getFirebaseApp } = await import('@/lib/firebase')
-
-        const app = await getFirebaseApp()
-        if (!app) {
-          console.warn('Firebase app not initialized')
-          if (isMounted) setLoading(false)
-          return
-        }
-
-        const auth = getAuth(app)
-        unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-          if (!isMounted) return
-          setUser(firebaseUser || null)
-          setLoading(false)
-        })
-      } catch (error) {
-        console.error('Auth initialization error:', error)
-        if (isMounted) setLoading(false)
-      }
+    if (!auth) {
+      setError('Firebase not configured. Check .env.local')
+      setLoading(false)
+      return
     }
 
-    initAuth()
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser)
+      setLoading(false)
+    }, (authError) => {
+      setError(authError.message)
+      setLoading(false)
+    })
 
-    return () => {
-      isMounted = false
-      unsubscribe?.()
-    }
+    return () => unsubscribe()
   }, [])
 
   const signIn = useCallback(async () => {
+    if (!auth) throw new Error('Firebase not initialized')
+    
     try {
-      const { getAuth, signInWithPopup, GoogleAuthProvider } = await import('firebase/auth')
-      const { getFirebaseApp } = await import('@/lib/firebase')
-      
-      const app = await getFirebaseApp()
-      if (!app) throw new Error('Firebase not initialized')
-
-      const auth = getAuth(app)
+      const { signInWithPopup, GoogleAuthProvider } = await import('firebase/auth')
       const provider = new GoogleAuthProvider()
       await signInWithPopup(auth, provider)
-    } catch (error) {
-      console.error('Sign in error:', error)
-      throw error
+    } catch (err: any) {
+      setError(err?.message || 'Failed to sign in')
+      throw err
     }
   }, [])
 
   const logOut = useCallback(async () => {
+    if (!auth) throw new Error('Firebase not initialized')
+    
     try {
-      const { getAuth, signOut } = await import('firebase/auth')
-      const { getFirebaseApp } = await import('@/lib/firebase')
-      
-      const app = await getFirebaseApp()
-      if (!app) throw new Error('Firebase not initialized')
-
-      const auth = getAuth(app)
+      const { signOut } = await import('firebase/auth')
       await signOut(auth)
-    } catch (error) {
-      console.error('Sign out error:', error)
-      throw error
+    } catch (err: any) {
+      setError(err?.message || 'Failed to sign out')
+      throw err
     }
   }, [])
 
-  return { user, loading, signIn, logOut }
+  return { user, loading, signIn, logOut, error }
 }

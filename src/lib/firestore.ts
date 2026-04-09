@@ -1,5 +1,17 @@
-// Firestore functions - Firebase integration (optional)
-// These functions use dynamic imports to avoid webpack errors
+// Firestore functions
+import { db } from '@/lib/firebase'
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  query, 
+  where, 
+  orderBy, 
+  doc,
+  updateDoc,
+  deleteDoc,
+  Timestamp 
+} from 'firebase/firestore'
 
 export interface Chat {
   id: string
@@ -10,12 +22,9 @@ export interface Chat {
 }
 
 export async function createChat(userId: string, title: string): Promise<string> {
-  try {
-    const { getFirestore } = await import('./firebase')
-    const { collection, addDoc, Timestamp } = await import('firebase/firestore')
-    const db = await getFirestore()
-    if (!db) throw new Error('Firestore not initialized')
+  if (!db) return 'local-' + Date.now()
 
+  try {
     const chatRef = await addDoc(collection(db, 'chats'), {
       userId,
       title,
@@ -24,22 +33,14 @@ export async function createChat(userId: string, title: string): Promise<string>
     })
     return chatRef.id
   } catch (error) {
-    console.log('Chat history disabled - Firebase not configured')
+    console.error('Error creating chat:', error)
     return 'local-' + Date.now()
   }
 }
 
-export async function saveMessage(
-  chatId: string,
-  role: string,
-  content: string
-): Promise<void> {
+export async function saveMessage(chatId: string, role: string, content: string): Promise<void> {
+  if (!db) return
   try {
-    const { getFirestore } = await import('./firebase')
-    const { collection, addDoc, Timestamp } = await import('firebase/firestore')
-    const db = await getFirestore()
-    if (!db) return
-
     await addDoc(collection(db, 'messages'), {
       chatId,
       role,
@@ -47,17 +48,14 @@ export async function saveMessage(
       createdAt: Timestamp.now(),
     })
   } catch (error) {
-    // Silent fail - chat history disabled
+    console.error('Error saving message:', error)
   }
 }
 
-export async function getChatHistory(userId: string): Promise<any[]> {
-  try {
-    const { getFirestore } = await import('./firebase')
-    const { collection, query, where, orderBy, getDocs, Timestamp, deleteDoc, doc } = await import('firebase/firestore')
-    const db = await getFirestore()
-    if (!db) return []
+export async function getChatHistory(userId: string): Promise<Chat[]> {
+  if (!db) return []
 
+  try {
     const chatsQuery = query(
       collection(db, 'chats'),
       where('userId', '==', userId),
@@ -65,27 +63,26 @@ export async function getChatHistory(userId: string): Promise<any[]> {
     )
 
     const snapshot = await getDocs(chatsQuery)
-    const chats: any[] = []
-    const fiveDaysAgo = Date.now() - (5 * 24 * 60 * 60 * 1000) // 5 days in milliseconds
+    const chats: Chat[] = []
+    const fiveDaysAgo = Date.now() - (5 * 24 * 60 * 60 * 1000)
 
-    // Filter chats older than 5 days and delete them
     for (const docSnap of snapshot.docs) {
       const chatData = docSnap.data()
-      const chatTimestamp = chatData.updatedAt?.toMillis?.() || chatData.updatedAt?.seconds * 1000 || 0
-      
+      const chatTimestamp = chatData.updatedAt?.toMillis?.() || 0
+
       if (chatTimestamp < fiveDaysAgo) {
-        // Delete old chat and its messages
         await deleteDoc(doc(db, 'chats', docSnap.id))
         await deleteChatMessages(docSnap.id)
-        console.log(`Deleted old chat: ${docSnap.id} (older than 5 days)`)
       } else {
         chats.push({
           id: docSnap.id,
-          ...chatData,
+          title: chatData.title || 'Untitled',
+          userId: chatData.userId,
+          createdAt: chatData.createdAt,
+          updatedAt: chatData.updatedAt,
         })
       }
     }
-
     return chats
   } catch (error) {
     console.error('Error loading chat history:', error)
@@ -93,76 +90,54 @@ export async function getChatHistory(userId: string): Promise<any[]> {
   }
 }
 
-// Helper function to delete all messages in a chat
 async function deleteChatMessages(chatId: string): Promise<void> {
+  if (!db) return
   try {
-    const { getFirestore } = await import('./firebase')
-    const { collection, query, where, getDocs, deleteDoc, doc } = await import('firebase/firestore')
-    const db = await getFirestore()
-    if (!db) return
-
     const messagesQuery = query(
       collection(db, 'messages'),
       where('chatId', '==', chatId)
     )
-
     const snapshot = await getDocs(messagesQuery)
-    const deletePromises = snapshot.docs.map(msgDoc => deleteDoc(doc(db, 'messages', msgDoc.id)))
+    const deletePromises = snapshot.docs.map(msgDoc => deleteDoc(doc(db!, 'messages', msgDoc.id)))
     await Promise.all(deletePromises)
   } catch (error) {
-    console.error('Error deleting chat messages:', error)
+    console.error('Error deleting messages:', error)
   }
 }
 
 export async function getMessages(chatId: string): Promise<any[]> {
-  try {
-    const { getFirestore } = await import('./firebase')
-    const { collection, query, where, orderBy, getDocs } = await import('firebase/firestore')
-    const db = await getFirestore()
-    if (!db) return []
+  if (!db) return []
 
+  try {
     const messagesQuery = query(
       collection(db, 'messages'),
       where('chatId', '==', chatId),
       orderBy('createdAt', 'asc')
     )
-
     const snapshot = await getDocs(messagesQuery)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }))
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
   } catch (error) {
+    console.error('Error getting messages:', error)
     return []
   }
 }
 
 export async function updateChatTitle(chatId: string, title: string): Promise<void> {
+  if (!db) return
   try {
-    const { getFirestore } = await import('./firebase')
-    const { doc, updateDoc, Timestamp } = await import('firebase/firestore')
-    const db = await getFirestore()
-    if (!db) return
-
-    const chatRef = doc(db, 'chats', chatId)
-    await updateDoc(chatRef, {
+    await updateDoc(doc(db, 'chats', chatId), {
       title,
       updatedAt: Timestamp.now(),
     })
   } catch (error) {
-    // Silent fail
+    console.error('Error updating chat:', error)
   }
 }
 
 export async function deleteChat(chatId: string): Promise<void> {
   try {
     await deleteChatMessages(chatId)
-    
-    const { getFirestore } = await import('./firebase')
-    const { deleteDoc, doc } = await import('firebase/firestore')
-    const db = await getFirestore()
     if (!db) return
-
     await deleteDoc(doc(db, 'chats', chatId))
   } catch (error) {
     console.error('Error deleting chat:', error)
