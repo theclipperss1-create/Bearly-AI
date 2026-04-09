@@ -553,76 +553,88 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="max-w-4xl mx-auto space-y-6">
-            {messages.length === 0 ? (
+        {/* Messages Area - ChatGPT Style */}
+        <div className="flex-1 overflow-y-auto">
+          {messages.length === 0 ? (
+            /* Landing Page - ChatGPT Style */
+            <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-4">
               <motion.div
-                className="flex items-center justify-center min-h-[500px]"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                className="max-w-3xl w-full text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="text-center px-4">
-                  {/* Logo */}
-                  <motion.div
-                    className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6 sm:mb-8 rounded-2xl bg-[#161616] border border-[#1A1A1A] flex items-center justify-center"
-                    style={{
-                      boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-                    }}
-                    animate={{
-                      y: [0, -10, 0],
-                    }}
-                    transition={{
-                      y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-                    }}
-                  >
-                    <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                    </svg>
-                  </motion.div>
+                {/* Simple Logo */}
+                <motion.div
+                  className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/10"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <svg className="w-8 h-8 text-white/80" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                  </svg>
+                </motion.div>
 
-                  {/* Title & Subtitle */}
-                  <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight mb-2 sm:mb-3">
-                    NOIR
-                  </h1>
-                  <p className="text-gray-500 text-sm sm:text-base max-w-md mx-auto mb-8 sm:mb-10">
-                    Premium AI chatbot with monochrome elegance
-                  </p>
+                <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2">
+                  How can I help you today?
+                </h1>
+                <p className="text-gray-500 text-sm sm:text-base mb-12">
+                  I'm NOIR, your AI assistant. Ask me anything.
+                </p>
 
-                  {/* Suggestion Chips */}
-                  <div className="flex gap-2 sm:gap-3 justify-center flex-wrap px-4">
-                    {[
-                      { icon: '💻', text: 'Help me code' },
-                      { icon: '🔬', text: 'Explain quantum physics' },
-                      { icon: '✍️', text: 'Write a poem' },
-                    ].map((suggestion, i) => (
-                      <motion.button
-                        key={suggestion.text}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 + i * 0.1 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setInput(suggestion.text)
-                          setTimeout(() => {
-                            const form = document.querySelector('form')
-                            if (form) {
-                              form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-                            }
-                          }, 100)
-                        }}
-                        className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl border border-[#1A1A1A] bg-[#161616] text-gray-400 text-xs sm:text-sm hover:bg-[#1C1C1C] hover:text-white transition-all flex items-center gap-2 cursor-pointer touch-target-lg"
-                      >
-                        <span className="text-base">{suggestion.icon}</span>
-                        <span className="font-medium">{suggestion.text}</span>
-                      </motion.button>
-                    ))}
-                  </div>
+                {/* Suggestion Grid - ChatGPT Style */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl mx-auto">
+                  {[
+                    { icon: '💻', title: 'Help me code', desc: 'Debug, explain, or write code' },
+                    { icon: '📝', title: 'Write content', desc: 'Essays, emails, posts' },
+                    { icon: '🧠', title: 'Explain concepts', desc: 'Learn anything deeply' },
+                    { icon: '🎯', title: 'Solve problems', desc: 'Math, logic, analysis' },
+                    { icon: '💡', title: 'Brainstorm ideas', desc: 'Creative thinking partner' },
+                    { icon: '🔍', title: 'Research topic', desc: 'Summarize & analyze' },
+                  ].map((suggestion, i) => (
+                    <motion.button
+                      key={suggestion.title}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + i * 0.05 }}
+                      onClick={() => {
+                        setInput(suggestion.title)
+                        setTimeout(() => {
+                          const form = document.querySelector('form')
+                          if (form) {
+                            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+                          }
+                        }, 100)
+                      }}
+                      className="group p-4 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] text-left transition-all hover:border-white/10"
+                    >
+                      <div className="text-2xl mb-2">{suggestion.icon}</div>
+                      <div className="text-sm font-medium text-white mb-0.5 group-hover:text-white/90">
+                        {suggestion.title}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {suggestion.desc}
+                      </div>
+                    </motion.button>
+                  ))}
                 </div>
               </motion.div>
-            ) : (
+            </div>
+          ) : (
+            /* Messages - ChatGPT Style Alternating */
+            <div className="max-w-none">
+              <AnimatePresence>
+                {messages.map((message, index) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    onCopy={handleCopy}
+                    copiedId={copiedId}
+                    onRegenerate={handleRegenerate}
+                    isLastMessage={index === messages.length - 1}
+                  />
+                ))}
+              </AnimatePresence>
               <AnimatePresence>
                 {messages.map((message, index) => (
                   <ChatMessage 
@@ -660,107 +672,92 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Input Area */}
-        <div className="px-4 sm:px-6 py-4 border-t border-[#1A1A1A] bg-[#0A0A0A]/90 backdrop-blur-xl mobile-safe-bottom">
-          <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-            {/* Limit Exceeded Warning */}
-            {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
-              <motion.div
-                data-testid="limit-exceeded-banner"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
-              >
-                <div className="flex items-start gap-3">
-                  <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                  <div className="flex-1">
-                    <p className="text-red-400 font-medium text-xs">Daily Limit Exceeded</p>
-                    <p className="text-red-400/70 text-xs mt-0.5">
-                      {userUsage?.tokensUsedToday.toLocaleString()} / {userUsage?.dailyLimit.toLocaleString()} tokens used
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            ) : null}
-
-            {/* Input Field */}
-            <div className="relative">
-              <motion.textarea
-                data-testid="chat-input"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Message NOIR..."
-                disabled={isLoading || hasExceededLimit || !!(userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit)}
-                rows={1}
-                className="w-full px-4 py-3 pr-12 rounded-xl border border-[#1A1A1A] bg-[#161616] text-white placeholder-gray-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-all resize-none touch-target-lg"
-                style={{
-                  minHeight: '52px',
-                  maxHeight: '200px',
-                  fontSize: '16px',
-                }}
-                onFocus={e => {
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                  e.target.style.boxShadow = '0 0 0 1px rgba(255, 255, 255, 0.1)';
-                }}
-                onBlur={e => {
-                  e.target.style.borderColor = 'rgba(26, 26, 26, 1)';
-                  e.target.style.boxShadow = 'none';
-                }}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit(e)
-                  }
-                }}
-              />
-              
-              {/* Send Button / Loading Indicator */}
-              <div className="absolute right-2 bottom-2">
-                {isLoading ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="p-2 rounded-lg bg-[#1C1C1C] border border-[#1A1A1A]"
-                  >
-                    <div className="flex gap-1">
-                      {[0, 1, 2].map((i) => (
-                        <motion.div
-                          key={i}
-                          className="w-1.5 h-1.5 rounded-full bg-white/30"
-                          animate={{
-                            y: [0, -5, 0],
-                          }}
-                          transition={{
-                            duration: 0.5,
-                            repeat: Infinity,
-                            delay: i * 0.15,
-                            ease: 'easeInOut',
-                          }}
-                        />
-                      ))}
+        {/* Input Area - ChatGPT Style */}
+        <div className="border-t border-white/5 bg-gradient-to-t from-[#0A0A0A] to-transparent">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+            <form onSubmit={handleSubmit}>
+              {/* Input Container */}
+              <div className="relative bg-[#161616] rounded-2xl border border-white/10 focus-within:border-white/20 transition-colors shadow-lg">
+                {/* Limit Exceeded Warning */}
+                {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
+                  <div className="px-4 pt-3 pb-2">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                      <svg className="w-4 h-4 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <p className="text-red-400 text-xs font-medium">
+                        Daily limit reached ({userUsage?.tokensUsedToday.toLocaleString()} / {userUsage?.dailyLimit.toLocaleString()})
+                      </p>
                     </div>
-                  </motion.div>
-                ) : (
-                  <motion.button
-                    type="submit"
-                    disabled={!input.trim() || isLoading}
-                    whileHover={{ scale: input.trim() && !isLoading ? 1.05 : 1 }}
-                    whileTap={{ scale: input.trim() && !isLoading ? 0.95 : 1 }}
-                    className="p-2 rounded-lg bg-white text-black disabled:opacity-50 disabled:cursor-not-allowed transition-all touch-target-lg"
+                  </div>
+                ) : null}
+
+                {/* Textarea */}
+                <div className="flex items-end gap-2 p-3">
+                  <motion.textarea
+                    data-testid="chat-input"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="Message NOIR..."
+                    disabled={isLoading || hasExceededLimit || !!(userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit)}
+                    rows={1}
+                    className="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none text-sm sm:text-[15px] leading-relaxed"
                     style={{
-                      boxShadow: input.trim() && !isLoading ? '0 4px 12px rgba(255, 255, 255, 0.2)' : 'none',
+                      minHeight: '24px',
+                      maxHeight: '200px',
+                      fontSize: '16px',
                     }}
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
-                  </motion.button>
-                )}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSubmit(e)
+                      }
+                    }}
+                  />
+                  
+                  {/* Send Button */}
+                  {isLoading ? (
+                    <motion.button
+                      disabled
+                      className="p-2 rounded-lg bg-white/10 text-white/50 flex-shrink-0"
+                    >
+                      <div className="flex gap-1">
+                        {[0, 1, 2].map((i) => (
+                          <motion.div
+                            key={i}
+                            className="w-1 h-1 rounded-full bg-white/50"
+                            animate={{ y: [0, -4, 0] }}
+                            transition={{ duration: 0.4, repeat: Infinity, delay: i * 0.1 }}
+                          />
+                        ))}
+                      </div>
+                    </motion.button>
+                  ) : (
+                    <motion.button
+                      type="submit"
+                      disabled={!input.trim() || isLoading}
+                      whileHover={{ scale: input.trim() ? 1.05 : 1 }}
+                      whileTap={{ scale: input.trim() ? 0.95 : 1 }}
+                      className={`p-2 rounded-lg flex-shrink-0 transition-all ${
+                        input.trim()
+                          ? 'bg-white text-black shadow-md'
+                          : 'bg-white/5 text-white/30 cursor-not-allowed'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                      </svg>
+                    </motion.button>
+                  )}
+                </div>
               </div>
-            </div>
-          </form>
+
+              {/* Footer Text */}
+              <p className="text-xs text-gray-600 text-center mt-3">
+                NOIR can make mistakes. Consider checking important information.
+              </p>
+            </form>
+          </div>
         </div>
       </div>
 
