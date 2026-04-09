@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import ChatMessage from '@/components/ChatMessage'
-import ModelSwitcher from '@/components/ModelSwitcher'
+import ModelChips from '@/components/ModelChips'
 import Sidebar from '@/components/Sidebar'
 import ContextPanel from '@/components/ContextPanel'
 import { useAuth } from '@/hooks/useAuth'
@@ -42,7 +42,6 @@ export default function Home() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id)
-  const [isModelSwitcherOpen, setIsModelSwitcherOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isContextPanelOpen, setIsContextPanelOpen] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(280)
@@ -528,8 +527,8 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`p-2.5 rounded-xl border transition-all ${
-                isContextPanelOpen 
-                  ? 'bg-white/5 border-[#27272A] text-white' 
+                isContextPanelOpen
+                  ? 'bg-white/5 border-[#27272A] text-white'
                   : 'bg-transparent border-[#1A1A1A] text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
@@ -537,30 +536,6 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </motion.button>
-            {/* Usage Indicator */}
-            {user && userUsage && (
-              <div data-testid="token-usage" className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-[#1A1A1A]">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse" />
-                  <span className="text-xs text-gray-400">
-                    {userUsage.tier === 'admin' ? '∞' : userUsage.tokensUsedToday.toLocaleString()} / {userUsage.dailyLimit === -1 ? '∞' : userUsage.dailyLimit.toLocaleString()}
-                  </span>
-                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${
-                    userUsage.tier === 'admin' ? 'bg-white/10 text-white' :
-                    userUsage.tier === 'premium' ? 'bg-white/10 text-white' :
-                    'bg-gray-500/10 text-gray-400'
-                  }`}>
-                    {userUsage.tier.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            )}
-            <ModelSwitcher
-              selectedModel={selectedModel}
-              onModelChange={setSelectedModel}
-              isOpen={isModelSwitcherOpen}
-              onToggle={() => setIsModelSwitcherOpen(!isModelSwitcherOpen)}
-            />
           </div>
         </header>
 
@@ -675,6 +650,14 @@ export default function Home() {
         {/* Input Form - NOIR Style - Mobile Optimized */}
         <div className="px-3 sm:px-6 py-3 sm:py-5 border-t border-[#1A1A1A] bg-[#0A0A0A]/80 backdrop-blur-xl mobile-safe-bottom">
           <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
+            {/* Model Chips - Floating Above Input */}
+            <div className="mb-3 sm:mb-4">
+              <ModelChips
+                selectedModel={selectedModel}
+                onModelChange={setSelectedModel}
+              />
+            </div>
+
             {/* Limit Exceeded Warning */}
             {hasExceededLimit || (userUsage && userUsage.tier !== 'admin' && userUsage.dailyLimit !== -1 && userUsage.tokensUsedToday >= userUsage.dailyLimit) ? (
               <motion.div
